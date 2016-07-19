@@ -28,7 +28,14 @@ namespace ClrVersion
         {
             Console.WriteLine("CLR Version");
             var signature = Get45andLaterVersion();
-            Console.WriteLine(signature);
+            if (signature == null)
+            {
+                Console.WriteLine(Environment.Version);
+            }
+            else
+            {
+                Console.WriteLine(signature);
+            }
             if (System.Diagnostics.Debugger.IsAttached)
             {
                 Console.ReadKey();

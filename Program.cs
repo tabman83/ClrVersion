@@ -10,32 +10,24 @@ namespace ClrVersion
     class Program
     {
 
-        private static readonly Dictionary<int, string> versions45andLaterMap = new Dictionary<int, string>
-        {
-            { 378389, ".NET Framework 4.5" },
-            { 378675, ".NET Framework 4.5.1 installed with Windows 8.1" },
-            { 378758, ".NET Framework 4.5.1 installed on Windows 8, Windows 7 SP1, or Windows Vista SP2" },
-            { 379893, ".NET Framework 4.5.2" },
-            { 393295, ".NET Framework 4.6 installed with Windows 10" },
-            { 393297, ".NET Framework 4.6 installed on all other Windows OS versions" },
-            { 394254, ".NET Framework 4.6.1 installed on Windows 10" },
-            { 394271, ".NET Framework 4.6.1 installed on all other Windows OS versions" },
-            { 394747, ".NET Framework 4.6.2 Preview installed on Windows 10 RS1 Preview" },
-            { 394748, ".NET Framework 4.6.2 Preview installed on all other Windows OS versions" }
-        };
-
         static void Main(string[] args)
         {
-            Console.WriteLine("CLR Version");
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            System.Diagnostics.FileVersionInfo versionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
+            string header = string.Format("{0} by {1} (v.{2})", versionInfo.ProductName, versionInfo.CompanyName, versionInfo.ProductVersion);
+            Console.WriteLine(header);
+            Console.WriteLine();
+
             var signature = Get45andLaterVersion();
             if (signature == null)
             {
-                Console.WriteLine(Environment.Version);
+                Console.WriteLine("Detected CLR is: " + Environment.Version);
             }
             else
             {
                 Console.WriteLine(signature);
             }
+            Console.WriteLine();
             if (System.Diagnostics.Debugger.IsAttached)
             {
                 Console.ReadKey();
@@ -49,14 +41,54 @@ namespace ClrVersion
                 if (ndpKey != null && ndpKey.GetValue("Release") != null)
                 {
                     int releaseKey = (int)ndpKey.GetValue("Release");
-                    if (versions45andLaterMap.ContainsKey(releaseKey))
+                    string result = string.Empty;
+
+                    if (releaseKey >= 394748)
                     {
-                        return versions45andLaterMap[releaseKey];
+                        result = ".NET Framework 4.6.2 Preview installed on all other Windows OS versions";
+                    }
+                    else if (releaseKey >= 394747)
+                    {
+                        result = ".NET Framework 4.6.2 Preview installed on Windows 10 RS1 Preview";
+                    }
+                    else if (releaseKey >= 394271)
+                    {
+                        result = ".NET Framework 4.6.1 installed on all other Windows OS versions";
+                    }
+                    else if (releaseKey >= 394254)
+                    {
+                        result = ".NET Framework 4.6.1 installed on Windows 10";
+                    }
+                    else if (releaseKey >= 393297)
+                    {
+                        result = ".NET Framework 4.6 installed on all other Windows OS versions";
+                    }
+                    else if (releaseKey >= 393295)
+                    {
+                        result = ".NET Framework 4.6 installed with Windows 10";
+                    }
+                    else if (releaseKey >= 379893)
+                    {
+                        result = ".NET Framework 4.5.2";
+                    }
+                    else if (releaseKey >= 378758)
+                    {
+                        result = ".NET Framework 4.5.1 installed on Windows 8, Windows 7 SP1, or Windows Vista SP2";
+                    }
+                    else if (releaseKey >= 378675)
+                    {
+                        result = ".NET Framework 4.5.1 installed with Windows 8.1";
+                    }
+                    else if (releaseKey >= 378389)
+                    {
+                        result = ".NET Framework 4.5";
                     }
                     else
                     {
                         return null;
                     }
+
+                    return "Detected CLR is: " + result + " (or later)";
                 }
                 else
                 {
